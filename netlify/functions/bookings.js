@@ -31,11 +31,9 @@ function res(body, status = 200) {
 
 function getSegment(event) {
   // path: /.netlify/functions/bookings  OR  /.netlify/functions/bookings/bk_xxx
-  const stripped = (event.path || '')
-    .replace(/^\/?\.netlify\/functions\/bookings\/?/, '')
-    .split('/')
-    .filter(Boolean);
-  return stripped[0] || null;
+  const path = event.rawPath || event.path || '';
+  const match = path.match(/\/bookings\/([^/?]+)/);
+  return match ? match[1] : null;
 }
 
 function adminOk(event) {

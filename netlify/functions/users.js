@@ -30,18 +30,15 @@ function json(body, status = 200) {
 }
 
 function getSegment(event) {
-  const stripped = (event.path || '')
-    .replace(/^\/?\.netlify\/functions\/users\/?/, '')
-    .split('/')
-    .filter(Boolean);
-  return stripped[0] || null;
+  const path = event.rawPath || event.path || '';
+  const match = path.match(/\/users\/([^/?]+)/);
+  return match ? match[1] : null;
 }
 
 function adminOk(event) {
   const headers = event.headers || {};
   const token = headers['x-admin-token'] || headers['X-Admin-Token'] || '';
   const expected = process.env.ADMIN_TOKEN || 'bloom2024';
-  if (!process.env.ADMIN_TOKEN) return token.length > 0;
   return token === expected;
 }
 
