@@ -115,10 +115,10 @@ export default function Book() {
           : form.notes,
         status: "pending",
       };
-      const created = await ndumie.entities.Booking.create(bookingData);
+      await ndumie.entities.Booking.create(bookingData);
       navigate("/booking-confirmed", { state: { booking: bookingData } });
     } catch (err) {
-      setError(err.message || "Something went wrong. Please try again.");
+      setError("Could not save your booking. Please check your connection and try again.");
       setLoading(false);
     }
   };
@@ -372,12 +372,12 @@ export default function Book() {
           {/* Navigation */}
           <div className="px-6 sm:px-10 pb-8 flex items-center justify-between gap-4">
             {step > 1 ? (
-              <Button variant="outline" onClick={() => setStep(step - 1)} className="rounded-xl px-5">
+              <Button variant="outline" onClick={() => { setStep(step - 1); setError(""); }} className="rounded-xl px-5">
                 <ChevronLeft className="w-4 h-4 mr-1" /> Back
               </Button>
             ) : <div />}
             {!isLastStep ? (
-              <Button onClick={() => setStep(step + 1)} disabled={!canProceed()}
+              <Button onClick={() => { setStep(step + 1); setError(""); }} disabled={!canProceed()}
                 className="rounded-xl px-6 bg-primary hover:bg-primary/90 text-primary-foreground ml-auto disabled:opacity-50 disabled:cursor-not-allowed">
                 Continue <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
