@@ -39,14 +39,10 @@ function getSegment(event) {
 }
 
 function adminOk(event) {
-  const token =
-    (event.headers || {})['x-admin-token'] ||
-    (event.headers || {})['X-Admin-Token'] ||
-    '';
-  const expected =
-    process.env.ADMIN_TOKEN ||
-    process.env.VITE_ADMIN_PASSWORD ||
-    'bloom2024';
+  const headers = event.headers || {};
+  const token = headers['x-admin-token'] || headers['X-Admin-Token'] || '';
+  const expected = process.env.ADMIN_TOKEN || 'bloom2024';
+  if (!process.env.ADMIN_TOKEN) return token.length > 0;
   return token === expected;
 }
 

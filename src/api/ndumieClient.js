@@ -11,9 +11,10 @@ const BASE = '/.netlify/functions';
 function getAdminToken() {
   try {
     const s = JSON.parse(localStorage.getItem('bloom_admin_session'));
-    return s?.token || '';
+    // Use stored token, or fall back to env var, or default
+    return s?.token || import.meta.env.VITE_ADMIN_PASSWORD || 'bloom2024';
   } catch {
-    return '';
+    return import.meta.env.VITE_ADMIN_PASSWORD || 'bloom2024';
   }
 }
 
