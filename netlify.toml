@@ -5,9 +5,8 @@
 
 [functions]
   node_bundler = "esbuild"
+  external_node_modules = ["@netlify/blobs"]
 
-# Local dev: `npm run dev:netlify` starts netlify dev on :8888
-# which proxies the Vite frontend on :5173 and serves functions
 [dev]
   command = "npm run dev"
   port = 8888
@@ -15,7 +14,12 @@
   framework = "#custom"
   autoLaunch = false
 
-# Serve functions at their natural path (no rewrite needed)
+[[redirects]]
+  from = "/.netlify/functions/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

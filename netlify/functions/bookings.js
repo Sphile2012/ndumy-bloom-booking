@@ -53,7 +53,6 @@ export const handler = async (event) => {
     console.error('[bookings] Failed to get store:', err);
     return res({ message: 'Storage unavailable. Please try again.' }, 503);
   }
-
   try {
 
     /* ── GET /bookings ─────────────────────────────────────────────── */
