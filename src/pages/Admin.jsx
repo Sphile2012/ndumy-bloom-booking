@@ -25,26 +25,42 @@ const STATUS_ICONS = {
 };
 
 function LoginScreen() {
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail]     = useState("");
+  const [error, setError]     = useState("");
   const [loading, setLoading] = useState(false);
+
+  const ADMIN_EMAILS = [
+    "phunyezwamjoli3@gmail.com",
+    "bloomskillsandbeauty@icloud.com",
+    "thobsin.e@gmail.com",
+  ];
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    const emailLower = email.trim().toLowerCase();
     try {
-      const adminPass = import.meta.env.VITE_ADMIN_PASSWORD || "bloom2024";
-      if (password === adminPass) {
-        localStorage.setItem("bloom_admin_session", JSON.stringify({
-          role: "admin",
-          email: "admin@bloomskillsandbeauty.com",
-          token: adminPass,
-        }));
-        window.location.reload();
-      } else {
-        setError("Incorrect password. Please try again.");
+      let user;
+      try {
+        user = await ndumie.auth.login(emailLower);
+      } catch (_) {
+        // Local dev fallback
+        if (ADMIN_EMAILS.includes(emailLower)) {
+          user = { role: "admin", email: emailLower, name: emailLower.split("@")[0] };
+        } else {
+          throw new Error("This email is not registered as an admin.");
+        }
       }
+      localStorage.setItem("bloom_admin_session", JSON.stringify({
+        role:  user.role,
+        email: user.email,
+        name:  user.name || "",
+        token: import.meta.env.VITE_ADMIN_PASSWORD || "bloom2024",
+      }));
+      window.location.reload();
+    } catch (err) {
+      setError(err.message || "This email is not authorised.");
     } finally {
       setLoading(false);
     }
@@ -52,28 +68,44 @@ function LoginScreen() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="text-center bg-card border border-border/50 rounded-3xl p-10 max-w-sm w-full shadow-xl">
-        <p className="text-5xl mb-4">💅</p>
-        <h2 className="font-heading text-2xl font-bold text-foreground mb-2">Bloom Skills & Beauty Admin</h2>
-        <p className="text-muted-foreground text-sm mb-4">Enter your admin password to continue.</p>
-        <form onSubmit={handleLogin} className="space-y-3 text-left">
-          <Input
-            type="password"
-            placeholder="Admin password"
-            value={password}
-            onChange={(e) => { setPassword(e.target.value); setError(""); }}
-            className="rounded-xl h-11"
-            autoFocus
-          />
-          {error && <p className="text-xs text-red-600 text-center">{error}</p>}
+      <div className="bg-card border border-border/50 rounded-3xl p-10 max-w-sm w-full shadow-xl">
+        <div className="text-center mb-8">
+          <p className="text-5xl mb-4">💅</p>
+          <h2 className="font-heading text-2xl font-bold text-foreground mb-1">Admin Login</h2>
+          <p className="text-muted-foreground text-sm">Bloom Skills &amp; Beauty</p>
+        </div>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div>
+            <label className="text-sm font-medium text-foreground block mb-1.5">Email Address</label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setError(""); }}
+                className="rounded-xl h-11 pl-9"
+                autoFocus
+                autoComplete="email"
+              />
+            </div>
+          </div>
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
+              ⚠️ {error}
+            </div>
+          )}
           <Button
             type="submit"
-            disabled={loading || !password}
-            className="w-full rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground"
+            disabled={loading || !email.trim()}
+            className="w-full rounded-xl h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
           >
-            {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Logging in...</> : "Log In"}
+            {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Checking...</> : "Continue"}
           </Button>
         </form>
+        <p className="text-xs text-muted-foreground text-center mt-6">
+          Only registered admin emails can access the dashboard.
+        </p>
       </div>
     </div>
   );

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
-  Menu, X, LogOut, Home, Scissors, GraduationCap,
-  Image, Phone, LayoutDashboard,
+  Menu, X, LogOut, LogIn, Home, Scissors,
+  GraduationCap, Image, Phone, LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
@@ -12,12 +12,14 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
-  // Check both context user and localStorage session — admins stay admins
+  // Check both context user and localStorage — admins stay admins across refreshes
   const localSession = (() => {
     try { return JSON.parse(localStorage.getItem("bloom_admin_session")); } catch { return null; }
   })();
-  const isAdmin = user?.role === "admin" || localSession?.role === "admin";
+  const isAdmin    = user?.role === "admin" || localSession?.role === "admin";
+  const isLoggedIn = isAdmin; // only admins have accounts on this site
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -30,14 +32,20 @@ export default function Navbar() {
   const handleLogout = () => {
     logout();
     close();
+    navigate("/");
+  };
+
+  const handleLogin = () => {
+    close();
+    navigate("/login");
   };
 
   const navLinks = [
-    { label: "Home",        to: "/",           icon: Home },
-    { label: "Services",    to: "/services",   icon: Scissors },
-    { label: "Nail Course", to: "/nail-course",icon: GraduationCap },
-    { label: "Gallery",     to: "/gallery",    icon: Image },
-    { label: "Contact",     to: "/contact",    icon: Phone },
+    { label: "Home",        to: "/",            icon: Home },
+    { label: "Services",    to: "/services",    icon: Scissors },
+    { label: "Nail Course", to: "/nail-course", icon: GraduationCap },
+    { label: "Gallery",     to: "/gallery",     icon: Image },
+    { label: "Contact",     to: "/contact",     icon: Phone },
   ];
 
   return (
@@ -102,7 +110,7 @@ export default function Navbar() {
               onClick={close}
             />
 
-            {/* Drawer panel */}
+            {/* Drawer */}
             <motion.div
               key="drawer"
               initial={{ opacity: 0, y: -6 }}
@@ -113,24 +121,25 @@ export default function Navbar() {
             >
               <div className="max-w-6xl mx-auto px-6 py-4 space-y-0.5">
 
-                {/* Main nav links — everyone sees these */}
+                {/* ── Nav links — everyone sees these ── */}
                 {navLinks.map(({ label, to, icon: Icon }) => (
                   <Link
                     key={to}
                     to={to}
                     onClick={close}
-                    className="flex items-center gap-4 px-3 py-3.5 rounded-2xl hover:bg-secondary/60 transition-colors group"
+                    className="flex items-center gap-4 px-3 py-3.5 rounded-2xl hover:bg-secondary/60 transition-colors"
                   >
                     <Icon className="w-5 h-5 text-primary shrink-0" />
                     <span className="font-medium text-foreground text-base">{label}</span>
                   </Link>
                 ))}
 
-                {/* Divider + admin-only items */}
-                {isAdmin && (
-                  <>
-                    <div className="h-px bg-border/60 mx-3 my-2" />
+                {/* ── Divider ── */}
+                <div className="h-px bg-border/60 mx-3 my-2" />
 
+                {isLoggedIn ? (
+                  /* ── Admin: Dashboard + Logout ── */
+                  <>
                     <Link
                       to="/admin"
                       onClick={close}
@@ -148,6 +157,15 @@ export default function Navbar() {
                       <span className="font-medium text-muted-foreground text-base">Logout</span>
                     </button>
                   </>
+                ) : (
+                  /* ── Guest: Login ── */
+                  <button
+                    onClick={handleLogin}
+                    className="flex items-center gap-4 px-3 py-3.5 rounded-2xl hover:bg-secondary/60 transition-colors w-full text-left"
+                  >
+                    <LogIn className="w-5 h-5 text-primary shrink-0" />
+                    <span className="font-medium text-primary text-base">Login</span>
+                  </button>
                 )}
 
                 <div className="pb-2" />

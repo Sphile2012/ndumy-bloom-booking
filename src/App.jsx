@@ -14,6 +14,7 @@ import BookingConfirmed from './pages/BookingConfirmed';
 import Gallery from './pages/Gallery';
 import Contact from './pages/Contact';
 import Admin from './pages/Admin';
+import Login from './pages/Login';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
               <Route path="/gallery"           element={<Gallery />} />
               <Route path="/contact"           element={<Contact />} />
               <Route path="/admin"             element={<Admin />} />
+              <Route path="/login"             element={<Login />} />
               <Route path="*"                  element={<PageNotFound />} />
             </Route>
           </Routes>

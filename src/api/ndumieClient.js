@@ -99,6 +99,19 @@ const Announcement = {
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 const auth = {
+  /** Login with email only. Returns user object on success. */
+  async login(email) {
+    const res = await fetch(`${BASE}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Login failed');
+    return data;
+  },
+
+  /** Returns the current admin session from localStorage, or rejects. */
   me() {
     try {
       const session = JSON.parse(localStorage.getItem('bloom_admin_session'));
@@ -106,6 +119,7 @@ const auth = {
     } catch (_) {}
     return Promise.reject(new Error('Not authenticated'));
   },
+
   logout() {
     localStorage.removeItem('bloom_admin_session');
   },
